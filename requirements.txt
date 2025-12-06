@@ -1,7 +1,7 @@
 numpy
 Flask
 gunicorn
-scikit-learn
+scikit-learn==1.5.2
 pandas
 PyYAML
 evidently>=0.7.0
@@ -9,5 +9,3 @@ dill
 matplotlib
 six
 setuptools
-
--e .
