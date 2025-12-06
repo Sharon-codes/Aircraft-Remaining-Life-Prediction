@@ -1,4 +1,4 @@
-from distutils.log import INFO
+# Removed distutils.log import (deprecated in Python 3.12)
 import logging 
 from datetime import datetime
 import pandas as pd 

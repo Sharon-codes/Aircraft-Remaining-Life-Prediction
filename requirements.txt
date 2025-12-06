@@ -8,5 +8,6 @@ evidently>=0.7.0
 dill
 matplotlib
 six
+setuptools
 
 -e .
