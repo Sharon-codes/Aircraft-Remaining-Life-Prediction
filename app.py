@@ -6,11 +6,6 @@ import os
 import pandas as pd
 import numpy as np
 import traceback
-from Turbofan.logger import logging
-from Turbofan.exception import TurboException
-from Turbofan.constant import get_current_time_stamp, CONFIG_DIR
-from Turbofan.entity.Turbofan_predictor import TurbofanPredictor, TurbofanData
-from flask import send_file, abort, render_template
 
 ## Defining constants:
 ROOT_DIR = os.getcwd()
@@ -18,6 +13,18 @@ SAVED_MODELS_DIR_NAME = "saved_models"
 MODEL_DIR = os.path.join(ROOT_DIR, SAVED_MODELS_DIR_NAME)
 TURBOFAN_DATA_KEY = "Turbofan_data"
 RUL_VALUE_KEY = "RUL"
+
+# Delayed imports to catch import errors
+try:
+    from Turbofan.logger import logging
+    from Turbofan.exception import TurboException
+    from Turbofan.constant import get_current_time_stamp, CONFIG_DIR
+    from Turbofan.entity.Turbofan_predictor import TurbofanPredictor, TurbofanData
+except Exception as e:
+    print(f"Import error: {e}")
+    traceback.print_exc()
+
+from flask import send_file, abort, render_template
 
 ## Creating Flask Application:
 app = Flask(__name__)
@@ -28,7 +35,7 @@ def index():
     try:
         return render_template('index.html')
     except Exception as e:
-        return str(e)
+        return f"Error loading index: {str(e)}"
 
 
 @app.route('/predict', methods=['GET', 'POST'])
@@ -41,6 +48,8 @@ def predict():
 
     if request.method == 'POST':
         try:
+            print("=== Starting prediction ===")
+            
             engineNumber = int(request.form['engineNumber'])
             cycleNumber = int(request.form['cycleNumber'])
             sensor2 = float(request.form['sensor2'])
@@ -57,6 +66,8 @@ def predict():
             sensor17 = float(request.form['sensor17'])
             sensor20 = float(request.form['sensor20'])
             sensor21 = float(request.form['sensor21'])
+
+            print(f"Received form data: engine={engineNumber}, cycle={cycleNumber}")
 
             Turbofan_data = TurbofanData(
                 engineNumber=engineNumber,
@@ -76,7 +87,10 @@ def predict():
                 sensor20=sensor20,
                 sensor21=sensor21)
 
+            print("TurbofanData created")
+            
             Turbofan_df = Turbofan_data.get_Turbofan_data_dataframe()
+            print(f"DataFrame shape: {Turbofan_df.shape}")
             
             # Debug: Print model directory info
             print(f"MODEL_DIR: {MODEL_DIR}")
@@ -85,7 +99,18 @@ def predict():
                 print(f"Contents: {os.listdir(MODEL_DIR)}")
             
             Turbofan_predictor = TurbofanPredictor(model_dir=MODEL_DIR)
+            print("Predictor created")
+            
             RUL = Turbofan_predictor.predict(X=Turbofan_df)
+            print(f"Prediction result: {RUL}")
+            
+            # Handle numpy array output
+            if hasattr(RUL, '__iter__') and not isinstance(RUL, str):
+                RUL = round(float(RUL[0]), 2)
+            else:
+                RUL = round(float(RUL), 2)
+            
+            print(f"Final RUL value: {RUL}")
             
             context = {
                 TURBOFAN_DATA_KEY: Turbofan_data.get_Turbofan_data_as_dict(),
@@ -95,9 +120,11 @@ def predict():
             return render_template('predict.html', context=context)
         
         except Exception as e:
-            error_msg = f"Error: {str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-            print(error_msg)
-            context["error"] = str(e)
+            error_msg = str(e)
+            print(f"=== Prediction Error ===")
+            print(f"Error: {error_msg}")
+            traceback.print_exc()
+            context["error"] = error_msg
             return render_template('predict.html', context=context)
     
     return render_template("predict.html", context=context)
@@ -106,7 +133,42 @@ def predict():
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
-    return {"status": "healthy", "model_dir_exists": os.path.exists(MODEL_DIR)}
+    import sklearn
+    return {
+        "status": "healthy", 
+        "model_dir_exists": os.path.exists(MODEL_DIR),
+        "model_dir": MODEL_DIR,
+        "sklearn_version": sklearn.__version__,
+        "python_version": sys.version
+    }
+
+
+@app.route('/debug', methods=['GET'])
+def debug():
+    """Debug endpoint to test model loading"""
+    try:
+        import sklearn
+        from Turbofan.entity.Turbofan_predictor import TurbofanPredictor
+        
+        result = {
+            "sklearn_version": sklearn.__version__,
+            "python_version": sys.version,
+            "model_dir": MODEL_DIR,
+            "model_dir_exists": os.path.exists(MODEL_DIR),
+        }
+        
+        if os.path.exists(MODEL_DIR):
+            result["model_contents"] = os.listdir(MODEL_DIR)
+            
+            # Try to load the model
+            predictor = TurbofanPredictor(model_dir=MODEL_DIR)
+            model_path = predictor.get_latest_model_path()
+            result["latest_model_path"] = model_path
+            result["model_exists"] = os.path.exists(model_path)
+        
+        return result
+    except Exception as e:
+        return {"error": str(e), "traceback": traceback.format_exc()}
 
 
 if __name__ == "__main__":
