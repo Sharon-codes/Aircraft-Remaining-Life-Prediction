@@ -1,0 +1,259 @@
+Predictor input parameters for Remaining Useful Life (RUL) estimation
+
+Purpose
+
+How to use
+ This document provides a detailed, field-specific reference for the RUL prediction form including units, realistic ranges, validation, examples, and next steps.
+- Ensure numeric values are floats (sensors) or integers (engine and cycle numbers) as noted.
+
+How RUL is predicted (brief)
+- The model takes the sensor values for the provided `engineNumber` and `cycleNumber` and produces an estimated Remaining Useful Life (RUL). RUL may be expressed in cycles (i.e., number of cycles remaining until failure) because the training labels in CMAPSS are usually cycles-to-failure.
+- Typical RUL units: cycles (integer or float). For example, if the model predicts RUL=50, that means roughly 50 cycles of operation remain.
+- Range of RUL: from 0 up to the typical maximum engine life seen during training. Example: if training engines run up to 300 cycles before failure, RUL values would range 0–~300. The model might return a float; you can round it for reporting.
+
+
+Engine Number
++ Short: `engineNumber`
++ Type: integer
++ Meaning: Identifier for the engine under test. Use a stable identifier if you will run repeated predictions for the same engine across cycles.
++ Importance: bookkeeping only — not directly used by physics-based features in most ML models, but useful for grouping time-series entries.
+
+Current Cycle Number
++ Short: `cycleNumber`
++ Type: integer
++ Meaning: Sequential observation index (time-step) for the engine. This is the time coordinate used to compute RUL (RUL = failure_cycle - current_cycle in many training setups).
++ Importance: critical — model expects cycle context to place sensor values in life-stage.
+
+Total temperature at LPC outlet (°R)
++ Short: `T_LPC_out` (form label: "Total temperature at LPC outlet(°R )")
++ Type: float (°R, Rankine)
++ Physical meaning: Total (stagnation) temperature measured immediately after the Low-Pressure Compressor (LPC) stage or fan/compressor interface. It reflects compression heating plus inlet conditions.
++ Typical engineering bounds (guidance): 500–1500 °R. Values vary by engine and operating point.
++ Why it matters for RUL: Elevated or rapidly rising compressor outlet temperatures can indicate reduced compression efficiency, hot streaks or component degradation that shorten life.
++ Validation: finite, > 0. If your data are in °C or °F convert or document scaling.
+
+Total temperature at HPC outlet (°R)
++ Short: `T_HPC_out` (form label: "Total temperature at HPC outlet(°R )")
++ Type: float (°R)
++ Physical meaning: Stagnation temperature after the High-Pressure Compressor; sensitive to inlet temperature and compression ratio. Higher HPC outlet temperatures occur at high power settings.
++ Typical bounds: 600–2000 °R (dataset dependent).
++ Why it matters: Higher HPC temperatures can increase thermal stress on downstream turbine components and influence degradation signals that reduce RUL.
+
+Total temperature at LPT outlet (°R)
++ Short: `T_LPT_out` (form label: "Total temperature at LPT outlet(°R )")
++ Type: float (°R)
++ Physical meaning: Stagnation temperature measured after the Low-Pressure Turbine (LPT) exit. It reflects how much energy has been extracted by turbines and the effectiveness of cooling systems.
++ Typical bounds: 400–1500 °R.
++ Why it matters: Changes may reflect turbine efficiency loss or cooling bleed effectiveness; drift may be associated with component wear.
+
+Total pressure at HPC outlet (psia)
++ Short: `Pt_HPC_out` (form label: "Total pressure at HPC outlet(psia)")
++ Type: float (psia)
++ Physical meaning: Stagnation (total) pressure after the High-Pressure Compressor. It is a measure of compressor performance and inlet condition.
++ Typical bounds: 10–150 psia (highly engine-dependent).
++ Why it matters: Reduced pressure rise or pressure losses indicate compressor deterioration, leading to earlier failure.
+
+Physical fan speed (rpm)
++ Short: `N_fan` (form label: "Physical fan speed(rpm)")
++ Type: float (rpm)
++ Physical meaning: Rotational speed of the fan/low-pressure spool measured in actual rpm.
++ Typical bounds: 1000–15000 rpm (varies by engine).
++ Why it matters: Off-nominal speeds may stress bearings and blades; trends over time are predictive of health.
+
+Physical core speed (rpm)
++ Short: `N_core` (form label: "Physical core speed (rpm)")
++ Type: float (rpm)
++ Physical meaning: Rotational speed of the high-pressure spool / core, in rpm.
++ Typical bounds: 1000–18000 rpm (engine dependent).
+
+Static pressure at HPC outlet (psia)
++ Short: `Ps_HPC_out` (form label: "Static pressure at HPC outlet (psia)")
++ Type: float (psia)
++ Physical meaning: Static (ambient-relative) pressure measured at the HPC outlet station.
++ Typical bounds: 5–120 psia depending on altitude, throttle and engine.
+
+Ratio of fuel flow to Ps30 (pps/psi)
++ Short: `Wf_over_Ps30` (form label: "Ratio of fuel flow to Ps30 (pps/psi)")
++ Type: float (lbs/s per psi)
++ Physical meaning: Normalized fuel flow (mass flow of fuel) divided by a pressure measurement (Ps30 often denotes station 30 pressure) to provide a dimensionless or normalized control input.
++ Typical bounds: 0.01–10.0 (highly dataset-dependent). Use training data to confirm.
++ Why it matters: High fuel flow for a given pressure can indicate richer combustion or higher thermal loading — correlates with wear.
+
+Corrected fan speed (rpm)
++ Short: `Nf_corrected` (form label: "Corrected fan speed (rpm)")
++ Type: float (rpm)
++ Physical meaning: Fan spool speed corrected for inlet temperature and pressure so values are comparable across altitude and ambient conditions. Corrected speeds remove ambient effects using a standard correction formula.
++ Typical bounds: same order as physical speed but normalized; e.g., 1000–15000 corrected rpm.
++ Why it matters: Better indicator of aerodynamic operating point and stress on the fan stage than raw rpm alone.
+
+Corrected core speed (rpm)
++ Short: `Nc_corrected` (form label: "Corrected core speed(rpm)")
++ Type: float (rpm)
++ Physical meaning: Core (high-pressure spool) speed corrected for ambient conditions.
+
+Bypass Ratio
++ Short: `BypassRatio` (form label: "Bypass Ratio")
++ Type: float (dimensionless)
++ Physical meaning: Ratio of mass flow through the bypass (fan) stream to the mass flow through the core stream. Typical modern turbofan civil engines: ~2–10.
++ Typical bounds: 0.5–12.0 (depending on engine class).
++ Why it matters: Bypass ratio correlates with engine architecture and performance envelope; it helps place sensor readings in the correct operating context.
+
+Bleed Enthalpy
++ Short: `BleedEnthalpy` (form label: "Bleed Enthalpy")
++ Type: float (energy per mass unit — dataset may use scaled units)
++ Physical meaning: Specific enthalpy of bleed air drawn from compressor stages used for cooling or anti-ice. Units depend on dataset (e.g., Btu/lbm or J/kg).
++ Typical bounds: dataset dependent; consult training data for exact scale.
+
+HPT coolant bleed (lbm/s)
++ Short: `HPT_bleed` (form label: "HPT coolant bleed(lbm/s )")
++ Type: float (lbm/s)
++ Physical meaning: Mass flow of coolant bleed directed to the High-Pressure Turbine for cooling purposes.
++ Typical bounds: 0.0–10.0 lbm/s (typically small values).
+
+LPT coolant bleed (lbm/s)
++ Short: `LPT_bleed` (form label: "LPT coolant bleed (lbm/s)")
++ Type: float (lbm/s)
++ Physical meaning: Mass flow of coolant bleed directed to the Low-Pressure Turbine.
+
+Turbofan RUL (output)
++ Short: `RUL` (form label: "Turbofan RUL")
++ Type: float (cycles)
++ Meaning: Estimated Remaining Useful Life in operation cycles. Many training labels are integer cycle counts; model may return float.
++ Typical bounds: 0 up to maximum life seen during training (e.g., 300+ cycles). Treat negative predictions as 0.
+
+Measurement & unit guidance
++ If your measurements use different units (°C, °F, Pa, kg/s), convert them to the units expected by the model or ensure the preprocessing pipeline performs conversion.
++ Corrected speeds require ambient pressure and temperature to compute; if the form asks for corrected values, supply them directly or request the app to compute corrected values (if the app supports it).
+
+Validation rules (recommended)
++ All inputs must be numeric and finite; reject empty strings and NaNs.
++ Temperatures: > 0 if in Rankine.
++ Pressures and speeds: >= 0 and within physical plausibility for your engine type.
++ Bypass ratio: > 0.
+
+How these inputs affect the RUL prediction (intuition)
++ Compressor & turbine temperatures and pressures are primary indicators of component health: deviations from nominal behavior (increasing temps/pressures, loss of pressure rise) often signal degradation.
++ Speeds and bleed flows indicate operating point and cooling; abnormal patterns can reduce RUL.
+
+1) Current Cycle Number
+- Type: integer
+- Units: cycles (index)
+- Description: The sequential observation index for the engine (time-step). Starts at 1 and increments by 1 for each measurement. Used by the model to determine the engine's life stage; RUL is computed relative to this cycle.
+- Dataset guidance (train_FD001): min=1, max=362, mean≈108.8
+- Validation: integer ≥ 1. Warn if cycle number is larger than typical training max.
+
+2) Total temperature at LPC outlet (°R)
+- Type: float
+- Units: Rankine (°R)
+- Description: Stagnation (total) temperature measured immediately after the Low-Pressure Compressor (LPC). Indicates compression heating at the LPC exit and inlet conditions.
+- Typical range (engineering guidance): ~500–1500 °R. (Check training data if available.)
+- Validation: finite float > 0. Convert if your sensor uses °C/°F.
+
+3) Total temperature at HPC outlet (°R)
+- Type: float
+- Units: Rankine (°R)
+- Description: Total temperature after the High-Pressure Compressor (HPC). Sensitive to compression ratio and engine power setting.
+- Typical range: ~600–2000 °R (dataset-dependent).
+- Validation: finite float > 0.
+
+4) Total temperature at LPT outlet (°R)
+- Type: float
+- Units: Rankine (°R)
+- Description: Total temperature at the Low-Pressure Turbine (LPT) exit; reflects energy extraction and cooling performance.
+- Typical range: ~400–1500 °R.
+- Validation: finite float > 0.
+
+5) Total pressure at HPC outlet (psia)
+- Type: float
+- Units: psia (pounds per square inch absolute)
+- Description: Stagnation pressure after the High-Pressure Compressor — a key indicator of compressor performance.
+- Typical range: ~10–150 psia (engine and operating-condition dependent). Dataset-derived values should be used for strict validation.
+- Validation: finite float > 0.
+
+6) Physical fan speed (rpm)
+- Type: float
+- Units: rpm (revolutions per minute)
+- Description: Actual rotational speed of the fan / low-pressure spool.
+- Typical range: ~1,000–15,000 rpm depending on engine.
+- Validation: finite positive float; reject negative values.
+
+7) Physical core speed (rpm)
+- Type: float
+- Units: rpm
+- Description: Rotational speed of the high-pressure spool (core) in rpm.
+- Typical range: ~1,000–18,000 rpm depending on engine.
+- Validation: finite positive float.
+
+8) Static pressure at HPC outlet (psia)
+- Type: float
+- Units: psia
+- Description: Static (ambient-relative) pressure at the HPC outlet station (differs from total pressure by dynamic pressure terms).
+- Typical range: ~5–120 psia depending on altitude and throttle.
+- Validation: finite float ≥ 0.
+
+9) Ratio of fuel flow to Ps30 (pps/psi)
+- Type: float
+- Units: (lbs/s) / psi or dataset-scaled units
+- Description: Fuel mass flow divided by a pressure measurement at station 30 (Ps30). Normalizes fueling across ambient conditions.
+- Typical guidance: broad dataset-dependent range (example 0.01–10.0). Use training data for exact bounds.
+- Validation: finite float ≥ 0.
+
+10) Corrected fan speed (rpm)
+- Type: float
+- Units: rpm (corrected)
+- Description: Fan spool speed corrected for inlet temperature and pressure to make values comparable across differing ambient conditions.
+- Typical range: same order as physical fan speed, normalized; validate against training-corrected values if available.
+- Validation: finite positive float.
+
+11) Corrected core speed (rpm)
+- Type: float
+- Units: rpm (corrected)
+- Description: Core spool speed corrected for ambient conditions.
+- Validation: finite positive float.
+
+12) Bypass Ratio
+- Type: float
+- Units: dimensionless
+- Description: Ratio of bypass mass flow to core mass flow; an engine architecture parameter that helps interpret other sensor values.
+- Typical range: ~0.5–12.0 depending on engine class; civil turbofans often 2–10.
+- Validation: finite float > 0.
+
+13) Bleed Enthalpy
+- Type: float
+- Units: energy per mass (dataset-specific; e.g., J/kg or Btu/lbm, or scaled value)
+- Description: Specific enthalpy of compressor bleed air used for cooling or anti-icing. High enthalpy increases thermal load.
+- Typical range: dataset-dependent — check training data for units and scale.
+- Validation: finite float.
+
+14) HPT coolant bleed (lbm/s)
+- Type: float
+- Units: lbm/s (pounds mass per second)
+- Description: Mass flow of coolant bleed for the High-Pressure Turbine cooling system.
+- Typical guidance: small positive numbers; example dataset bounds 0.0–10.0 lbm/s, usually much smaller in practice.
+- Validation: finite float ≥ 0.
+
+15) LPT coolant bleed (lbm/s)
+- Type: float
+- Units: lbm/s
+- Description: Mass flow of coolant bleed for the Low-Pressure Turbine.
+- Typical guidance: dataset-dependent; validate ≥ 0.
+
+Example valid submission (all fields present)
++ Engine Number: 2
++ Current Cycle Number: 150
++ Total temperature at LPC outlet(°R): 920.3
++ Total temperature at HPC outlet(°R): 1187.6
++ Total temperature at LPT outlet(°R): 733.1
++ Total pressure at HPC outlet(psia): 48.2
++ Physical fan speed(rpm): 4300
++ Physical core speed (rpm): 10650
++ Static pressure at HPC outlet (psia): 39.5
++ Ratio of fuel flow to Ps30 (pps/psi): 1.02
++ Corrected fan speed (rpm): 4350
++ Corrected core speed (rpm): 10610
++ Bypass Ratio: 4.8
++ Bleed Enthalpy: 245.6
++ HPT coolant bleed(lbm/s): 0.92
++ LPT coolant bleed (lbm/s): 0.47
+
+

@@ -2,10 +2,8 @@ from Turbofan.logger import logging
 from Turbofan.exception import TurboException 
 from Turbofan.entity.config_entity import DataIngestionConfig, DataValidationConfig 
 from Turbofan.entity.artifact_entity import DataIngestionArtifact , DataValidationArtifact 
-from evidently.model_profile import Profile
-from evidently.model_profile.sections import DataDriftProfileSection
-from evidently.dashboard import Dashboard
-from evidently.dashboard.tabs import DataDriftTab
+# from evidently.report import Report
+# from evidently.metric_preset import DataDriftPreset
 import os,sys 
 import pandas as pd 
 import json 
@@ -60,38 +58,62 @@ class DataValidation:
 
     def get_and_save_data_drift_report(self): 
         try :
-            profile = Profile(sections=[DataDriftProfileSection()])
-
-            train_df,test_df = self.get_train_test_df()
-
-            profile.calculate(train_df,test_df)
-
-            report = json.loads(profile.json())
+            # Simplified data drift check without evidently
+            train_df, test_df = self.get_train_test_df()
+            
+            # Basic statistical comparison
+            drift_report = {
+                "train_shape": train_df.shape,
+                "test_shape": test_df.shape,
+                "train_columns": list(train_df.columns),
+                "test_columns": list(test_df.columns),
+                "train_stats": train_df.describe().to_dict(),
+                "test_stats": test_df.describe().to_dict(),
+                "message": "Basic data validation completed (evidently disabled)"
+            }
 
             report_file_path = self.data_validation_config.report_file_path
             report_dir = os.path.dirname(report_file_path)
-            os.makedirs(report_dir,exist_ok=True)
+            os.makedirs(report_dir, exist_ok=True)
 
-            with open(report_file_path,"w") as report_file:
-                json.dump(report, report_file, indent=6)
-            return report 
+            with open(report_file_path, "w") as report_file:
+                json.dump(drift_report, report_file, indent=6)
+            return drift_report 
         except Exception as e : 
-            raise TurboException(e,sys)
+            raise TurboException(e, sys)
 
     def save_data_drift_report_page(self): 
         try : 
-            dashboard = Dashboard(tabs=[DataDriftTab()])
-            train_df,test_df = self.get_train_test_df()
-            dashboard.calculate(train_df,test_df)
+            # Simplified HTML report generation without evidently
+            train_df, test_df = self.get_train_test_df()
+            
+            # Create a simple HTML report
+            html_content = f"""
+            <html>
+            <head><title>Data Validation Report</title></head>
+            <body>
+                <h1>Data Validation Report</h1>
+                <h2>Dataset Shapes</h2>
+                <p>Train dataset shape: {train_df.shape}</p>
+                <p>Test dataset shape: {test_df.shape}</p>
+                <h2>Train Dataset Statistics</h2>
+                {train_df.describe().to_html()}
+                <h2>Test Dataset Statistics</h2>
+                {test_df.describe().to_html()}
+                <p><em>Note: This is a simplified report (evidently disabled)</em></p>
+            </body>
+            </html>
+            """
 
             report_page_file_path = self.data_validation_config.report_page_file_path
             report_page_dir = os.path.dirname(report_page_file_path)
-            os.makedirs(report_page_dir,exist_ok=True)
+            os.makedirs(report_page_dir, exist_ok=True)
 
-            dashboard.save(report_page_file_path)
+            with open(report_page_file_path, "w") as f:
+                f.write(html_content)
 
         except Exception as e : 
-            raise TurboException(e,sys)
+            raise TurboException(e, sys)
 
     def is_data_drift_found(self): 
         try : 

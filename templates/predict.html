@@ -1,172 +1,678 @@
 {% extends 'header.html' %}
 
 {% block head %}
+<title>RUL Prediction - TurboPredict AI</title>
+<style>
+    /* Page Header */
+    .page-header {
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+    }
 
+    .page-header h1 {
+        font-family: 'Orbitron', monospace;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
 
-<title>RUL Estimator</title>
+    .page-header h1 span {
+        background: linear-gradient(135deg, var(--primary-blue), #00ff88);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    /* Prediction Grid */
+    .prediction-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2rem;
+        animation: fadeInUp 0.6s ease 0.1s both;
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .form-header-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .form-header h2 {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .form-header p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-section-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px dashed var(--glass-border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-section-title i {
+        font-size: 0.85rem;
+    }
+
+    /* Input Grid */
+    .input-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .input-label .unit {
+        color: var(--primary-blue);
+        font-size: 0.75rem;
+        margin-left: 4px;
+    }
+
+    .input-label .range {
+        color: rgba(0, 212, 255, 0.6);
+        font-size: 0.7rem;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .input-field {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 0.875rem 1rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .input-field::placeholder {
+        color: rgba(160, 174, 192, 0.5);
+        font-size: 0.85rem;
+    }
+
+    /* Submit Button */
+    .submit-section {
+        margin-top: 2rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
+    }
+
+    /* Result Card */
+    .result-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2rem;
+        position: sticky;
+        top: 100px;
+        animation: fadeInUp 0.6s ease 0.2s both;
+    }
+
+    .result-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .result-header-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .result-header h2 {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* RUL Display */
+    .rul-display {
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 102, 204, 0.1));
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .rul-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .rul-value {
+        font-family: 'Orbitron', monospace;
+        font-size: 4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-blue), #00ff88);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .rul-unit {
+        font-size: 1rem;
+        color: var(--text-secondary);
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-healthy {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-critical {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Data Table */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .data-table th {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+        color: var(--text-primary);
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(0, 212, 255, 0.05);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 102, 204, 0.1));
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: var(--primary-blue);
+    }
+
+    .empty-state h3 {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        max-width: 280px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.95rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 1px solid var(--glass-border);
+        margin-top: 1rem;
+    }
+
+    .back-btn:hover {
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        background: rgba(0, 212, 255, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .prediction-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .result-card {
+            position: static;
+        }
+
+        .input-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .rul-value {
+            font-size: 3rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Engine RUL <span>Prediction</span></h1>
+    <p>Enter sensor readings to predict the Remaining Useful Life of your turbofan engine</p>
+</div>
 
-<div class="row">
-    <div class="col-md-6 col-sm-12 col-xs-6 col-lg-6">
-
+<div class="prediction-grid">
+    <!-- Form Card -->
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-header-icon">
+                <i class="fas fa-sliders-h"></i>
+            </div>
+            <div>
+                <h2>Sensor Data Input</h2>
+                <p>Provide engine sensor measurements</p>
+            </div>
+        </div>
 
         <form action="/predict" method="post">
-            <legend>RUL Estimation Form</legend>
-            <div class="mb-3">
-                <label class="form-label">Engine Number</label>
-                <input class="form-control" type="text" name="engineNumber" placeholder="Enter Engine Number from 1 to 100 "
-                    required />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Current Cycle Number</label>
-                <input class="form-control" type="text" name="cycleNumber" placeholder="Enter a value of Current operating Cycle "
-                    required />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Total temperature at LPC outlet(°R )</label>
-                <input class="form-control" type="text" name="sensor2"
-                    placeholder="Enter a value of Total temperature at LPC outlet in '°R' " />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Total temperature at HPC outlet(°R )</label>
-                <input class="form-control" type="text" name="sensor3" placeholder="Enter a value of Total temperature at HPC outlet in '°R' "
-                    required />
+            <!-- Engine Info Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-cog"></i>
+                    Engine Information
+                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">Engine Number <span class="unit">(1-100)</span></label>
+                        <input class="input-field" type="number" name="engineNumber" placeholder="e.g., 2" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Current Cycle Number<span class="range">Range: 1 - 362</span></label>
+                        <input class="input-field" type="number" name="cycleNumber" placeholder="e.g., 150" required>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Total temperature at LPT outlet(°R )</label>
-                <input class="form-control" type="text" name="sensor4"
-                    placeholder="Enter a value of Total temperature at LPT outlet in °R  " required />
+            <!-- Temperature Sensors Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-thermometer-half"></i>
+                    Temperature Sensors
+                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">LPC Outlet Temp <span class="unit">(°R)</span><span
+                                class="range">Range: 500 - 1500</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor2" placeholder="e.g., 920.3"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">HPC Outlet Temp <span class="unit">(°R)</span><span
+                                class="range">Range: 600 - 2000</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor3" placeholder="e.g., 1187.6"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">LPT Outlet Temp <span class="unit">(°R)</span><span
+                                class="range">Range: 400 - 1500</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor4" placeholder="e.g., 733.1"
+                            required>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Total pressure at HPC outlet(psia)</label>
-                <input class="form-control" type="text" name="sensor7" placeholder="Enter a value of Total pressure at HPC outlet in 'psia'"
-                    required />
+            <!-- Pressure Sensors Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Pressure Sensors
+                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">HPC Outlet Pressure <span class="unit">(psia)</span><span
+                                class="range">Range: 10 - 150</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor7" placeholder="e.g., 48.2"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">HPC Static Pressure <span class="unit">(psia)</span><span
+                                class="range">Range: 5 - 120</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor11" placeholder="e.g., 39.5"
+                            required>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Physical fan speed(rpm)</label>
-                <input class="form-control" type="text" name="sensor8" placeholder="Enter a value of Physical fan speed in 'rpm'"
-                    required />
+            <!-- Speed Sensors Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-sync-alt"></i>
+                    Speed Sensors
+                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">Physical Fan Speed <span class="unit">(rpm)</span><span
+                                class="range">Range: 1000 - 15000</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor8" placeholder="e.g., 4300"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Physical Core Speed <span class="unit">(rpm)</span><span
+                                class="range">Range: 1000 - 18000</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor9" placeholder="e.g., 10650"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Corrected Fan Speed <span class="unit">(rpm)</span><span
+                                class="range">Range: 1000 - 15000</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor13" placeholder="e.g., 4350"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Corrected Core Speed <span class="unit">(rpm)</span><span
+                                class="range">Range: 1000 - 18000</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor14" placeholder="e.g., 10610"
+                            required>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Physical core speed (rpm)</label>
-                <input class="form-control" type="text" name="sensor9"
-                    placeholder="Enter a value of Physical core speed in rpm" required />
+            <!-- Other Sensors Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-wave-square"></i>
+                    Other Parameters
+                </div>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">Fuel Flow Ratio <span class="unit">(pps/psi)</span><span
+                                class="range">Range: 0.01 - 10.0</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor12" placeholder="e.g., 1.02"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Bypass Ratio<span class="range">Range: 0.5 - 12.0</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor15" placeholder="e.g., 4.8"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Bleed Enthalpy<span class="range">Dataset dependent</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor17" placeholder="e.g., 245.6"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">HPT Coolant Bleed <span class="unit">(lbm/s)</span><span
+                                class="range">Range: 0.0 - 10.0</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor20" placeholder="e.g., 0.92"
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">LPT Coolant Bleed <span class="unit">(lbm/s)</span><span
+                                class="range">Range: 0.0 - 10.0</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor21" placeholder="e.g., 0.47"
+                            required>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Static pressure at HPC outlet (psia)</label>
-                <input class="form-control" type="text" name="sensor11"
-                    placeholder="Enter a value of Static pressure at HPC outlet  in 'psia' " required />
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-chart-line"></i>
+                    Predict Remaining Useful Life
+                </button>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Ratio of fuel flow to Ps30 (pps/psi)</label>
-                <input class="form-control" type="text" name="sensor12"
-                    placeholder="Enter a value of Ratio of fuel flow to Ps30 in 'pps/psi' " required />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Corrected fan speed (rpm)</label>
-                <input class="form-control" type="text" name="sensor13"
-                    placeholder="Enter a value of Corrected fan speed  in rpm " required />
-            
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Corrected core speed(rpm)</label>
-                <input class="form-control" type="text" name="sensor14"
-                    placeholder="Enter a value of Corrected core speed in rpm " required />
-
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Bypass Ratio </label>
-                <input class="form-control" type="text" name="sensor15"
-                    placeholder="Enter a value of Bypass Ratio  " required />
-                
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Bleed Enthalpy </label>
-                <input class="form-control" type="text" name="sensor17"
-                    placeholder="Enter a value of Bleed Enthalpy " required />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">HPT coolant bleed(lbm/s )</label>
-                <input class="form-control" type="text" name="sensor20"
-                    placeholder="Enter a value of HPT coolant bleed lbm/s " required />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">LPT coolant bleed (lbm/s) </label>
-                <input class="form-control" type="text" name="sensor21"
-                    placeholder="Enter a value of LPT coolant bleed  in lbm/s " required />
-
-            </div>
-
-            
-            <div class="mb-3">
-
-                <input class="btn btn-primary" type="submit" value="Predict Remaining Usefull Life(RUL)" required />
-            </div>
-
         </form>
     </div>
 
-    <div class="col-md-6 col-sm-12 col-xs-6 col-lg-6">
-        <div class="card">
-            <div class="card-header">
-              Turbofan RUL
+    <!-- Result Card -->
+    <div class="result-card">
+        <div class="result-header">
+            <div class="result-header-icon">
+                <i class="fas fa-chart-pie"></i>
             </div>
-            
-            <div class="card-body">
+            <h2>Prediction Result</h2>
+        </div>
+
         {% if context['Turbofan_data'] is not none %}
-        <table class="table table-striped">
-            <caption>Turbofan RUL Prediction </caption>
-            <tr>
-                <th>Input Feature</th>
-                <th>Feature Value</th>
+        <!-- RUL Display -->
+        <div class="rul-display">
+            <div class="rul-label">Estimated Remaining Useful Life</div>
+            <div class="rul-value">{{ context['RUL'] }}</div>
+            <div class="rul-unit">Operating Cycles</div>
+        </div>
 
-            </tr>
-            {% for column,value in context['Turbofan_data'].items() %}
+        <!-- Status Badge -->
+        {% set rul_value = context['RUL']|int %}
+        {% if rul_value > 100 %}
+        <div class="status-badge status-healthy">
+            <i class="fas fa-check-circle"></i>
+            Engine Health: Good
+        </div>
+        {% elif rul_value > 50 %}
+        <div class="status-badge status-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Engine Health: Monitor Closely
+        </div>
+        {% else %}
+        <div class="status-badge status-critical">
+            <i class="fas fa-times-circle"></i>
+            Engine Health: Schedule Maintenance
+        </div>
+        {% endif %}
 
+        <!-- Input Data Table -->
+        <h4
+            style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            <i class="fas fa-list"></i> Input Parameters
+        </h4>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for column, value in context['Turbofan_data'].items() %}
+                    <tr>
+                        <td>{{ column }}</td>
+                        <td>{{ value[0] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-
-            <tr>
-                <td>{{column}}</td>
-                <td>{{value[0]}}</td>
-            </tr>
-
-            {% endfor %}
-            <tr>
-
-                <td>RUL</td>
-                <td>
-                    {{ context['RUL'] }}
-                </td>
-            </tr>
-        </table>
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
 
         {% else %}
-       
-              <h5 class="card-title">Submit Form</h5>
-              <p class="card-text">Kindly provide necessary information to estimate RUL of Turbofan engine</p>
-            
-         
-
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-satellite-dish"></i>
+            </div>
+            <h3>Awaiting Sensor Data</h3>
+            <p>Fill in the sensor readings form and click predict to get the RUL estimation for your engine</p>
+        </div>
         {% endif %}
-        Go to <a href="/" class="btn btn-primary">Home</a>
     </div>
 </div>
-    </div>
-
-    {% endblock %}
+{% endblock %}
