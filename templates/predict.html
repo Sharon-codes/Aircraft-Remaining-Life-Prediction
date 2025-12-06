@@ -443,7 +443,7 @@
             </div>
             <div>
                 <h2>Sensor Data Input</h2>
-                <p>Provide engine sensor measurements</p>
+                <p>Provide engine sensor measurements (C-MAPSS dataset format)</p>
             </div>
         </div>
 
@@ -457,11 +457,11 @@
                 <div class="input-grid">
                     <div class="input-group">
                         <label class="input-label">Engine Number <span class="unit">(1-100)</span></label>
-                        <input class="input-field" type="number" name="engineNumber" placeholder="e.g., 2" required>
+                        <input class="input-field" type="number" name="engineNumber" placeholder="e.g., 1" required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Current Cycle Number<span class="range">Range: 1 - 362</span></label>
-                        <input class="input-field" type="number" name="cycleNumber" placeholder="e.g., 150" required>
+                        <input class="input-field" type="number" name="cycleNumber" placeholder="e.g., 100" required>
                     </div>
                 </div>
             </div>
@@ -475,20 +475,20 @@
                 <div class="input-grid">
                     <div class="input-group">
                         <label class="input-label">LPC Outlet Temp <span class="unit">(°R)</span><span
-                                class="range">Range: 500 - 1500</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor2" placeholder="e.g., 920.3"
+                                class="range">Range: 641 - 644</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor2" placeholder="e.g., 642.35"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">HPC Outlet Temp <span class="unit">(°R)</span><span
-                                class="range">Range: 600 - 2000</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor3" placeholder="e.g., 1187.6"
+                                class="range">Range: 1580 - 1610</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor3" placeholder="e.g., 1589.70"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">LPT Outlet Temp <span class="unit">(°R)</span><span
-                                class="range">Range: 400 - 1500</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor4" placeholder="e.g., 733.1"
+                                class="range">Range: 1390 - 1435</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor4" placeholder="e.g., 1400.60"
                             required>
                     </div>
                 </div>
@@ -503,14 +503,14 @@
                 <div class="input-grid">
                     <div class="input-group">
                         <label class="input-label">HPC Outlet Pressure <span class="unit">(psia)</span><span
-                                class="range">Range: 10 - 150</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor7" placeholder="e.g., 48.2"
+                                class="range">Range: 550 - 556</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor7" placeholder="e.g., 554.36"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">HPC Static Pressure <span class="unit">(psia)</span><span
-                                class="range">Range: 5 - 120</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor11" placeholder="e.g., 39.5"
+                                class="range">Range: 46.9 - 48.5</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor11" placeholder="e.g., 47.47"
                             required>
                     </div>
                 </div>
@@ -525,26 +525,26 @@
                 <div class="input-grid">
                     <div class="input-group">
                         <label class="input-label">Physical Fan Speed <span class="unit">(rpm)</span><span
-                                class="range">Range: 1000 - 15000</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor8" placeholder="e.g., 4300"
+                                class="range">Range: 2387 - 2389</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor8" placeholder="e.g., 2388.06"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Physical Core Speed <span class="unit">(rpm)</span><span
-                                class="range">Range: 1000 - 18000</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor9" placeholder="e.g., 10650"
+                                class="range">Range: 9033 - 9200</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor9" placeholder="e.g., 9046.19"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Corrected Fan Speed <span class="unit">(rpm)</span><span
-                                class="range">Range: 1000 - 15000</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor13" placeholder="e.g., 4350"
+                                class="range">Range: 2387 - 2389</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor13" placeholder="e.g., 2388.02"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Corrected Core Speed <span class="unit">(rpm)</span><span
-                                class="range">Range: 1000 - 18000</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor14" placeholder="e.g., 10610"
+                                class="range">Range: 8110 - 8260</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor14" placeholder="e.g., 8138.62"
                             required>
                     </div>
                 </div>
@@ -559,30 +559,30 @@
                 <div class="input-grid">
                     <div class="input-group">
                         <label class="input-label">Fuel Flow Ratio <span class="unit">(pps/psi)</span><span
-                                class="range">Range: 0.01 - 10.0</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor12" placeholder="e.g., 1.02"
+                                class="range">Range: 519 - 523</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor12" placeholder="e.g., 521.66"
                             required>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Bypass Ratio<span class="range">Range: 0.5 - 12.0</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor15" placeholder="e.g., 4.8"
+                        <label class="input-label">Bypass Ratio<span class="range">Range: 8.35 - 8.55</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor15" placeholder="e.g., 8.4195"
                             required>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Bleed Enthalpy<span class="range">Dataset dependent</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor17" placeholder="e.g., 245.6"
+                        <label class="input-label">Bleed Enthalpy<span class="range">Range: 389 - 400</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor17" placeholder="e.g., 392"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">HPT Coolant Bleed <span class="unit">(lbm/s)</span><span
-                                class="range">Range: 0.0 - 10.0</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor20" placeholder="e.g., 0.92"
+                                class="range">Range: 38.3 - 39.3</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor20" placeholder="e.g., 39.06"
                             required>
                     </div>
                     <div class="input-group">
                         <label class="input-label">LPT Coolant Bleed <span class="unit">(lbm/s)</span><span
-                                class="range">Range: 0.0 - 10.0</span></label>
-                        <input class="input-field" type="number" step="any" name="sensor21" placeholder="e.g., 0.47"
+                                class="range">Range: 22.9 - 23.6</span></label>
+                        <input class="input-field" type="number" step="any" name="sensor21" placeholder="e.g., 23.419"
                             required>
                     </div>
                 </div>
@@ -662,6 +662,22 @@
             <i class="fas fa-arrow-left"></i>
             Back to Home
         </a>
+
+        {% elif context.get('error') %}
+        <!-- Error State -->
+        <div class="empty-state"
+            style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 2rem;">
+            <div class="empty-state-icon"
+                style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3);">
+                <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+            </div>
+            <h3 style="color: #ef4444;">Prediction Error</h3>
+            <p style="color: #fca5a5;">{{ context['error'] }}</p>
+            <a href="/predict" class="back-btn" style="margin-top: 1rem;">
+                <i class="fas fa-redo"></i>
+                Try Again
+            </a>
+        </div>
 
         {% else %}
         <!-- Empty State -->
